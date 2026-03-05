@@ -1,57 +1,89 @@
 import streamlit as st
+from urllib.parse import quote
 
-# Configuración de la página
-st.set_page_config(page_title="EcoClean Assist", page_icon="🌱")
+# 1. Configuración de la página (¡Importante para celular!)
+st.set_page_config(
+    page_title="EcoClean Assist - Presupuestador",
+    page_icon="🌱",
+    layout="centered", # Centrado para que se vea mejor en PC y Mobile
+    initial_sidebar_state="collapsed"
+)
 
-# Títulos y Estética
-st.title("🌱 EcoClean Assist")
-st.subheader("Presupuestador de Limpieza y Césped")
+# --- 2. ESTILOS CSS PERSONALIZADOS (El "Maquillaje") ---
+# Esto cambia colores, bordes y espaciados para que no parezca un formulario estándar.
+st.markdown("""
+<style>
+    /* Fondo de la app y color de texto base */
+    .stApp {
+        background-color: #f9fbf9;
+        color: #2c3e50;
+    }
+    
+    /* Estilo para los títulos principales */
+    h1, h2, h3 {
+        color: #1e8449 !important; /* Un verde oscuro profesional */
+        font-family: 'Helvetica Neue', sans-serif;
+        font-weight: 700;
+    }
+    
+    /* Contenedor del formulario (Sombra y bordes redondeados) */
+    .stForm {
+        background-color: #ffffff;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border: 1px solid #e0e0e0;
+    }
+    
+    /* Estilo para las etiquetas de los campos */
+    .stMarkdown p {
+        font-size: 1.05rem;
+        color: #34495e;
+    }
 
-# --- LÓGICA DE NEGOCIO ---
+    /* Estilo del botón de enviar (VERDE) */
+    div.stButton > button:first-child {
+        background-color: #27ae60;
+        color: white;
+        border-radius: 8px;
+        border: none;
+        padding: 12px 24px;
+        font-weight: bold;
+        width: 100%; /* Botón ancho total en celular */
+        transition: all 0.3s ease;
+    }
+    div.stButton > button:first-child:hover {
+        background-color: #2ecc71;
+        transform: translateY(-2px);
+    }
+    
+    /* Estilo del resultado final (El cuadro de éxito) */
+    .stAlert {
+        border-radius: 10px;
+        border: 2px solid #27ae60;
+        background-color: #e8f8f5;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# --- 3. CABECERA (Logo y Título Visual) ---
+col1, col2, col3 = st.columns([1,2,1]) # Columnas para centrar el logo
+with col2:
+    # URL de un logo de ejemplo (Podés cambiar esta URL por la de tu logo real)
+    logo_url = "https://raw.githubusercontent.com/ulisesarelo/Mi-agente-de-servicio/main/logo_ecoclean.png" # Si subís tu logo a GitHub, usá esa URL raw.
+    try:
+        st.image(logo_url, width=150) # Intenta cargar el logo
+    except:
+        st.markdown("<h1 style='text-align: center;'>🌱 EcoClean</h1>", unsafe_allow_html=True) # Fallback si no hay logo
+
+st.markdown("<h3 style='text-align: center; color: #7f8c8d; font-weight: normal; margin-top: -15px;'>Tu presupuesto rápido y fácil</h3>", unsafe_allow_html=True)
+st.markdown("---") # Línea divisoria
+
+
+# --- 4. LÓGICA DE NEGOCIO (Los precios siguen igual) ---
 PRECIO_M2_CESPED = 600
 PRECIO_HORA_LIMPIEZA = 4000
+# Reemplazá este número con tu celular REAL (con código de país, sin el +)
+MI_TELEFONO_WHATSAPP = "5491100000000" 
 
-# --- INTERFAZ DE USUARIO ---
-with st.form("presupuestador"):
-    st.write("### 📝 Datos del Servicio")
-    
-    servicio = st.multiselect("¿Qué servicios necesitas?", ["Corte de Césped", "Limpieza de Hogar"])
-    
-    col1, col2 = st.columns(2)
-    
-    m2 = 0
-    horas = 0
-    
-    if "Corte de Césped" in servicio:
-        m2 = col1.number_input("Metros cuadrados ($m^2$):", min_value=0, step=10)
-        estado_pasto = col1.selectbox("Estado del pasto:", ["Normal", "Maleza Alta (+20%)"])
-        
-    if "Limpieza de Hogar" in servicio:
-        horas = col2.number_input("Horas estimadas:", min_value=0, step=1)
-
-    st.write("### 📍 Datos de Contacto")
-    ciudad = st.text_input("Ciudad")
-    direccion = st.text_input("Dirección Exacta")
-    fecha = st.date_input("Día para el servicio")
-    horario = st.time_input("Horario preferido")
-
-    enviado = st.form_submit_button("Calcular Presupuesto")
-
-# --- CÁLCULOS ---
-if enviado:
-    total_cesped = m2 * PRECIO_M2_CESPED
-    if "Maleza Alta" in locals() and estado_pasto == "Maleza Alta (+20%)":
-        total_cesped *= 1.2
-    
-    total_limpieza = horas * PRECIO_HORA_LIMPIEZA
-    total_final = total_cesped + total_limpieza
-    
-    if total_final > 0 and ciudad and direccion:
-        st.success(f"### ✅ Presupuesto Estimado: ${total_final:,.2f}")
-        st.info(f"**Resumen:** {m2}m² de césped y {horas}hs de limpieza en {ciudad}, {direccion} para el día {fecha} a las {horario}.")
-        
-        # Botón para enviar por WhatsApp (Opcional)
-        mensaje_wa = f"Hola EcoClean! Quiero agendar: {m2}m2 de césped y {horas}hs de limpieza en {direccion}, {ciudad} para el {fecha} a las {horario}. Total: ${total_final}"
-        st.link_button("📲 Enviar pedido por WhatsApp", f"https://wa.me/TU_TELEFONO_AQUI?text={mensaje_wa}")
-    else:
-        st.error("Por favor, completá todos los campos para generar el presupuesto.")
+# --- 5. EL FORMULARIO (
