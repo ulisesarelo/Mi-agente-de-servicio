@@ -84,6 +84,6 @@ st.markdown("---") # Línea divisoria
 PRECIO_M2_CESPED = 600
 PRECIO_HORA_LIMPIEZA = 4000
 # Reemplazá este número con tu celular REAL (con código de país, sin el +)
-MI_TELEFONO_WHATSAPP = "3407405533" 
+MI_TELEFONO_WHATSAPP = "5493407405533" 
 
 # --- 5. EL FORMULARIO (
